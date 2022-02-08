@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+pragma abicoder v2;
+
+import "./Ownable.sol";
+
+contract Library is Ownable{
+    mapping(address => string) participated;
+    mapping(string => Book) books; // The first string is the ID of the book.
+    mapping(address => string) borowers;
+
+    struct Book{
+       string name;
+       string copies;
+    }
+
+    function addBook (string calldata id, Book calldata book) public onlyOwner {
+      books[id] = book;
+    }
+
+    function changeCopies (string calldata id, string calldata copiesInput) public onlyOwner{
+      books[id].copies = copiesInput;
+    }
+
+    function print () public view{
+      //for(uint i = 0; i < books.length; i++){
+
+      //}
+    }
+}
