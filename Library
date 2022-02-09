@@ -6,25 +6,39 @@ import "./Ownable.sol";
 
 contract Library is Ownable{
     mapping(address => string) participated;
-    mapping(string => Book) books; // The first string is the ID of the book.
+    mapping(uint => Book) books;
     mapping(address => string) borowers;
+    uint booksLength = 0;
 
     struct Book{
        string name;
-       string copies;
+       uint copies;
+       string id;
     }
 
-    function addBook (string calldata id, Book calldata book) public onlyOwner {
-      books[id] = book;
+    function addBook (Book calldata _book) public onlyOwner {
+      books[booksLength] = _book;
+      booksLength++;
     }
 
-    function changeCopies (string calldata id, string calldata copiesInput) public onlyOwner{
-      books[id].copies = copiesInput;
+    function changeCopies (string calldata _idInput, uint _copiesInput) public onlyOwner{
+      for (uint8 i = 0; i < booksLength; i++) {
+            if (keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_idInput))) {
+               books[i].copies = _copiesInput;
+            }
+      }
     }
 
-    function print () public view{
-      //for(uint i = 0; i < books.length; i++){
-
-      //}
+    function print() public view returns(Book[] memory books){
+      Book[] memory ret = new Book[](booksLength); //Costs a lot, and it doesn't work!!! Me not like!
+      for(uint i = 0; i < booksLength; i++){
+        require(books[i].copies > 0);
+        books[i] = ret[i];
+      }
+      return ret;
+    }
+   
+    function borrow () public{ //Should add the buyer to the borrowers mappig!
+       
     }
 }
