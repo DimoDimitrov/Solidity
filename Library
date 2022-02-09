@@ -32,7 +32,7 @@ contract Library is Ownable{
     function print() public view returns(Book[] memory books){
       Book[] memory ret = new Book[](booksLength); //Costs a lot, and it doesn't work!!! Me not like!
       for(uint i = 0; i < booksLength; i++){
-        require(books[i].copies > 0);
+        require(books[i].copies > 0);// Can be written as modifier!
         books[i] = ret[i];
       }
       return ret;
