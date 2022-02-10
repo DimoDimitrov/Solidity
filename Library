@@ -5,9 +5,9 @@ pragma abicoder v2;
 import "./Ownable.sol";
 
 contract Library is Ownable{
-    mapping(address => string) participated;
     mapping(uint => Book) books;
-    mapping(address => string) borowers;
+    mapping(address => string) borrowers;
+    mapping(address => string) participated;
     uint booksLength = 0;
 
     struct Book{
@@ -16,7 +16,7 @@ contract Library is Ownable{
        string id;
     }
 
-    function addBook (Book calldata _book) public onlyOwner {
+    function setBook (Book calldata _book) public onlyOwner {
       books[booksLength] = _book;
       booksLength++;
     }
@@ -29,16 +29,28 @@ contract Library is Ownable{
       }
     }
 
-    function print() public view returns(Book[] memory books){
-      Book[] memory ret = new Book[](booksLength); //Costs a lot, and it doesn't work!!! Me not like!
+    function getBooks () public view returns(Book[] memory){
+      Book[] memory ret = new Book[](booksLength);
       for(uint i = 0; i < booksLength; i++){
-        require(books[i].copies > 0);// Can be written as modifier!
-        books[i] = ret[i];
+        require(books[i].copies > 0);
+        Book storage book = books[i];
+        ret[i] = book;
       }
       return ret;
     }
    
-    function borrow () public{ //Should add the buyer to the borrowers mappig!
-       
+    function borrowBook (string calldata _idInput) public{
+       for(uint i = 0; i < booksLength; i++){
+          if(keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_idInput))){// and if he alwready borrowed a copy
+            borrowers[msg.sender] = books[i].id;
+            books[i].copies--;
+          }
+       }
     }
+
+    function returnBook (string calldata _idInput) public{// Deletes the item from borrowers and ads it to paricipated!
+                                                          //copies++
+    }
+
+    //Print function for borrowers and participated
 }
