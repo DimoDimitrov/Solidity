@@ -7,8 +7,10 @@ import "./Ownable.sol";
 contract Library is Ownable{
     mapping(uint => Book) books;
     mapping(address => string) borrowers;
-    mapping(address => string) participated;
+    mapping(uint => address) participated;
+    uint participatedLength = 0;
     uint booksLength = 0;
+    bool contained;
 
     struct Book{
        string name;
@@ -17,8 +19,15 @@ contract Library is Ownable{
     }
 
     function setBook (Book calldata _book) public onlyOwner {
-      books[booksLength] = _book;
-      booksLength++;
+      for (uint8 i = 0; i < booksLength; i++) {
+        if(keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_book.id))){
+          contained = true;
+        }
+      }
+      if(contained == false){
+        books[booksLength] = _book;
+        booksLength++;
+      }
     }
 
     function changeCopies (string calldata _idInput, uint _copiesInput) public onlyOwner{
@@ -41,16 +50,31 @@ contract Library is Ownable{
    
     function borrowBook (string calldata _idInput) public{
        for(uint i = 0; i < booksLength; i++){
-          if(keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_idInput))){// and if he alwready borrowed a copy
+          if(keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_idInput))
+            && !(keccak256(abi.encodePacked(borrowers[msg.sender])) == keccak256(abi.encodePacked(_idInput)))){
             borrowers[msg.sender] = books[i].id;
+            participated[i] = msg.sender; 
+            participatedLength++;
             books[i].copies--;
           }
        }
     }
 
-    function returnBook (string calldata _idInput) public{// Deletes the item from borrowers and ads it to paricipated!
-                                                          //copies++
+    function returnBook (string calldata _idInput) public{
+      for(uint i = 0; i < booksLength; i++){
+          if(keccak256(abi.encodePacked(books[i].id)) == keccak256(abi.encodePacked(_idInput))
+          && (keccak256(abi.encodePacked(_idInput)) == keccak256(abi.encodePacked(borrowers[msg.sender])))){
+            books[i].copies++;
+          }
+       }
+       delete(borrowers[msg.sender]);
     }
 
-    //Print function for borrowers and participated
+    function getParticipated() public view returns(address[] memory){
+      address[] memory part = new address[](participatedLength);
+      for(uint i = 0; i < participatedLength; i++){
+        part[i] = participated[i];
+      }
+      return part;
+    }
 }
